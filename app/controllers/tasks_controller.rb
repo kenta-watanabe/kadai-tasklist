@@ -58,6 +58,6 @@ end
   
   def task_params
     # formで書かれた情報をまとめて受け取ることができる
-    params.require(:task).permit(:content)
+    params.require(:task).permit(:content, :Status)
   end
 end
