@@ -1,8 +1,14 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update, :destroy]
+  before_action :require_user_logged_in
+  before_action :correct_user, only: [:destroy]
   
   def index
-    @tasks = Task.all.page(params[:page]).per(10)
+#    @tasks = Task.all.page(params[:page]).per(10)
+    if logged_in?
+#      @task = current_user.tasks.build  # form_with 用
+      @tasks = current_user.tasks.order(id: :desc).page(params[:page])   
+    end
   end
 
   def show
@@ -16,15 +22,26 @@ class TasksController < ApplicationController
   end
 
   def create
-    # redirect_to "http://www.yahoo.co.jp/"
-    @task = Task.new(task_params)
+    
+    @task = current_user.tasks.build(task_params)
+      
     if @task.save
-      flash[:success] = "Taskが正常に投稿されました"
-      redirect_to @task
+      flash[:success] = "成功"
+      redirect_to root_url
     else
-      flash.now[:danger] = "Taskが投稿されませんでした"
-      render :new
+      @tasks = current_user.tasks.order(id: :desc).page(params[:page])
+      flash.now[:danger] = "失敗"
+      render "tasks/index"
     end
+
+#    @task = Task.new(task_params)
+#    if @task.save
+#      flash[:success] = "Taskが正常に投稿されました"
+#      redirect_to @task
+#    else
+#      flash.now[:danger] = "Taskが投稿されませんでした"
+#      render :new
+#    end
     # @task = Task.new(content: params[:task][:content])
   end
 
@@ -52,12 +69,20 @@ class TasksController < ApplicationController
   
   private
   
-def set_task
-  @task = Task.find(params[:id])
-end
+  def set_task
+    @task = Task.find(params[:id])
+  end
   
   def task_params
     # formで書かれた情報をまとめて受け取ることができる
-    params.require(:task).permit(:content, :Status)
+    params.require(:task).permit(:content, :status)
   end
+  
+  def correct_user
+    @micropost = current_user.tasks.find_by(id: params[:id])
+    unless @micropost
+      redirect_to root_url
+    end
+  end
+  
 end

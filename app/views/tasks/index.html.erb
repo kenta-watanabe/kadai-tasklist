@@ -1,8 +1,11 @@
-<%= link_to "Sign up now!", signup_path %>
+<% if logged_in? %>
+  <p>ログイン完了: <%= current_user.name %></p>
+<% else %>
+<% end %>
 
 <h1>Task一覧</h1>
 
-<% if @tasks.any? %>
+<% if logged_in? %>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -14,9 +17,13 @@
     <tbody>
       <% @tasks.each do |task| %>
         <tr>
-          <td><%= link_to task.id, task %></td>
-          <td><%= task.Status %></td>
-          <td><%= task.content %></td>
+          <% if logged_in? %>
+            <td><%= link_to task.id, task %></td>
+          <% else %>
+            <td><%= task.id %></td>
+          <% end %>
+            <td><%= task.status %></td>
+            <td><%= task.content %></td>
         </tr>
       <% end %>
     </tbody>
@@ -26,4 +33,6 @@
   </div>
 <% end %>
 
+<% if logged_in? %>
 <%= link_to '新規taskの投稿', new_task_path, class: "btn btn-primary" %>
+<% end %>
